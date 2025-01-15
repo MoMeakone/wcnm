@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我草泥马编程</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            /* 亮色主题变量 - 使用更具情绪化的配色 */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --accent-color: #FF4B4B;  /* 改为愤怒的红色 */
+            --card-shadow: 0 2px 15px rgba(255,75,75,0.1);
+            --navbar-bg: rgba(255, 255, 255, 0.8);
+            --gradient-start: #FF4B4B;
+            --gradient-end: #FF8F8F;
+        }
+
+        [data-theme="dark"] {
+            /* 暗色主题变量 - 更深沉的配色 */
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --accent-color: #FF6B6B;
+            --card-shadow: 0 2px 15px rgba(255,75,75,0.2);
+            --navbar-bg: rgba(26, 26, 26, 0.8);
+            --gradient-start: #FF6B6B;
+            --gradient-end: #FF9F9F;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 导航栏样式 */
+        .navbar {
+            background-color: var(--navbar-bg);
+            padding: 1rem;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .navbar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .navbar a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .navbar a:hover {
+            color: var(--accent-color);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.5rem;
+        }
+
+        /* 主要内容区域样式 */
+        .main-content {
+            margin-top: 80px;
+            padding: 2rem;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            flex: 1;
+            width: 100%;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 5rem 1rem;
+            background-color: var(--bg-secondary);
+            border-radius: 20px;
+            margin-bottom: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, var(--gradient-start), var(--gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .rage-meter {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 2rem 0;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 10px 20px;
+            background: rgba(255, 75, 75, 0.1);
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .rage-meter:hover {
+            transform: scale(1.05);
+            background: rgba(255, 75, 75, 0.2);
+        }
+
+        .rage-number {
+            font-weight: bold;
+            color: var(--accent-color);
+            transition: all 0.3s ease;
+        }
+
+        @keyframes numberPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.5); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes explode {
+            0% { 
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% { 
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        .explosion {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .explosion-particle {
+            position: absolute;
+            background: var(--accent-color);
+            border-radius: 50%;
+            animation: explode 0.6s ease-out forwards;
+        }
+
+        @keyframes rage-shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px) rotate(-5deg); }
+            75% { transform: translateX(5px) rotate(5deg); }
+        }
+
+        .shake-effect {
+            animation: rage-shake 0.3s ease-in-out;
+        }
+
+        .courses {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 1rem;
+        }
+
+        .course-card {
+            background: var(--bg-primary);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            transform: translateY(0);
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .course-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-shadow), 0 5px 25px rgba(0,122,255,0.1);
+        }
+
+        .course-card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .course-card i {
+            color: var(--accent-color);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(45deg, var(--gradient-start), var(--gradient-end));
+            border: none;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.3s;
+            margin-top: 1rem;
+        }
+
+        .btn:hover {
+            transform: scale(1.05) rotate(-2deg);
+            background: linear-gradient(45deg, var(--gradient-end), var(--gradient-start));
+        }
+
+        /* 页脚样式 */
+        .footer {
+            background-color: var(--bg-secondary);
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 2rem;
+            width: 100%;
+            margin-top: auto;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .navbar-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .navbar ul {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .main-content {
+                margin-top: 150px;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+        }
+
+        /* 添加表情动画 */
+        .emoji-rain {
+            position: fixed;
+            top: -20px;
+            animation: fall 3s linear infinite;
+            color: var(--accent-color);
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh);
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <h1><i class="fas fa-bomb"></i> 我草泥马编程</h1>
+            <ul>
+                <li><a href="#home"><i class="fas fa-fire"></i> 首页</a></li>
+                <li>
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <section class="hero">
+            <h1>欢迎来到我草泥马编程</h1>
+            <p>这里是程序员发泄负能量的天堂</p>
+            <div class="rage-meter" id="rageMeter">
+                <i class="fas fa-thermometer-full"></i>
+                <span>今日崩溃指数: <span id="rageNumber" class="rage-number">999+</span></span>
+            </div>
+            <button class="btn">
+                开始崩溃 <i class="fas fa-radiation"></i>
+            </button>
+        </section>
+
+        <section class="courses" id="courses">
+            <div class="course-card">
+                <h2><i class="fas fa-bug"></i> Bug制造专精</h2>
+                <p>从入门到放弃，带你体验调试的折磨。</p>
+                <button class="btn">崩溃详情 <i class="fas fa-skull-crossbones"></i></button>
+            </div>
+            <div class="course-card">
+                <h2><i class="fas fa-exclamation-triangle"></i> 加班修仙之路</h2>
+                <p>996福报精华，ICU直通车。</p>
+                <button class="btn">深入了解 <i class="fas fa-hospital"></i></button>
+            </div>
+            <div class="course-card">
+                <h2><i class="fas fa-memory"></i> 内存泄漏艺术</h2>
+                <p>见证你的电脑如何变成暖气片。</p>
+                <button class="btn">立即体验 <i class="fas fa-fire"></i></button>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2024 我草泥马编程 | 用代码表达愤怒 | 用Bug讲述人生</p>
+    </footer>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        const themeIcon = themeToggle.querySelector('i');
+
+        themeToggle.addEventListener('click', () => {
+            if (html.getAttribute('data-theme') === 'light') {
+                html.setAttribute('data-theme', 'dark');
+                themeIcon.className = 'fas fa-sun';
+            } else {
+                html.setAttribute('data-theme', 'light');
+                themeIcon.className = 'fas fa-moon';
+            }
+        });
+
+        // 添加崩溃指数交互效果
+        const rageMeter = document.getElementById('rageMeter');
+        const rageNumber = document.getElementById('rageNumber');
+        let currentRage = 999;
+
+        function createExplosion(x, y) {
+            const explosionContainer = document.createElement('div');
+            explosionContainer.className = 'explosion';
+            explosionContainer.style.left = x + 'px';
+            explosionContainer.style.top = y + 'px';
+
+            // 创建多个爆炸粒子
+            for (let i = 0; i < 12; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'explosion-particle';
+                particle.style.width = '4px';
+                particle.style.height = '4px';
+                particle.style.left = '0px';
+                particle.style.top = '0px';
+                particle.style.transform = `rotate(${i * 30}deg) translateY(-10px)`;
+                explosionContainer.appendChild(particle);
+            }
+
+            document.body.appendChild(explosionContainer);
+            setTimeout(() => explosionContainer.remove(), 600);
+        }
+
+        function getRandomIncrement() {
+            return Math.floor(Math.random() * 500) + 100;
+        }
+
+        function updateRageNumber(event) {
+            // 添加抖动效果
+            rageMeter.classList.add('shake-effect');
+            
+            // 更新数字
+            currentRage += getRandomIncrement();
+            rageNumber.style.animation = 'numberPop 0.3s ease-out';
+            rageNumber.textContent = currentRage + '+';
+            
+            // 创建爆炸效果
+            createExplosion(event.clientX, event.clientY);
+
+            // 移除动画类，以便下次点击可以再次触发
+            setTimeout(() => {
+                rageNumber.style.animation = '';
+                rageMeter.classList.remove('shake-effect');
+            }, 300);
+
+            // 触发更密集的表情雨
+            for(let i = 0; i < 5; i++) {
+                setTimeout(createEmojiRain, i * 100);
+            }
+        }
+
+        rageMeter.addEventListener('click', updateRageNumber);
+
+        // 修改表情雨效果，使其更具爆发性
+        function createEmojiRain() {
+            const emojis = ['💢', '💥', '🤬', '😡', '😠', '😤', '🔥', '⚡'];
+            const emoji = document.createElement('div');
+            emoji.className = 'emoji-rain';
+            emoji.style.left = Math.random() * 100 + 'vw';
+            emoji.style.fontSize = Math.random() * 20 + 20 + 'px';
+            emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            document.body.appendChild(emoji);
+
+            emoji.addEventListener('animationend', () => {
+                emoji.remove();
+            });
+        }
+
+        setInterval(createEmojiRain, 500);
+
+        // 添加开始崩溃按钮的事件监听
+        const startRageBtn = document.querySelector('.hero .btn');
+        startRageBtn.addEventListener('click', (event) => {
+            // 触发更剧烈的崩溃效果
+            for(let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                    updateRageNumber(event);
+                }, i * 200);
+            }
+            
+            // 添加按钮动画效果
+            startRageBtn.classList.add('shake-effect');
+            setTimeout(() => {
+                startRageBtn.classList.remove('shake-effect');
+            }, 300);
+        });
+    </script>
+</body>
+</html> 
